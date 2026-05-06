@@ -289,12 +289,13 @@
       const el = document.getElementById('dday-list');
       const today = new Date(); today.setHours(0,0,0,0);
       if (!S.ddays.length) { el.innerHTML = '<div class="empty">D-day가 없습니다</div>'; return; }
-      el.innerHTML = S.ddays.map((d,i) => {
-        const t = new Date(d.date); t.setHours(0,0,0,0);
-        const diff = Math.round((t-today)/86400000);
+      const sorted = S.ddays
+        .map((d,i) => ({ ...d, i, diff: Math.round((new Date(d.date)-today)/86400000) }))
+        .sort((a,b) => Math.abs(a.diff) - Math.abs(b.diff));
+      el.innerHTML = sorted.map(({name, diff, i}) => {
         const lbl = diff===0 ? 'D-day' : diff>0 ? 'D-'+diff : 'D+'+Math.abs(diff);
         return `<div class="dday-item">
-          <span class="dday-name">${d.name}</span>
+          <span class="dday-name">${name}</span>
           <span class="dday-badge${diff<0?' past':''}">${lbl}</span>
           <button class="del-btn" onclick="delDday(${i})" aria-label="삭제"><i class="ti ti-x"></i></button>
         </div>`;
