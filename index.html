@@ -320,27 +320,27 @@
       }).join('');
     }
 
-    function addMemo() {
+    async function addMemo() {
       const inp = document.getElementById('memo-input'), t = inp.value.trim(); if(!t) return;
-      S.memos.unshift({text:t, date:todayStr()}); save(); inp.value=''; renderMemos();
+      S.memos.unshift({text:t, date:todayStr()}); inp.value=''; renderMemos(); await save();
     }
-    function delMemo(i) { S.memos.splice(i,1); save(); renderMemos(); }
+    async function delMemo(i) { S.memos.splice(i,1); renderMemos(); await save(); }
 
-    function addTodo() {
+    async function addTodo() {
       const inp = document.getElementById('todo-input'), t = inp.value.trim(); if(!t) return;
-      S.todos.unshift({text:t, done:false}); save(); inp.value=''; renderTodos();
+      S.todos.unshift({text:t, done:false}); inp.value=''; renderTodos(); await save();
     }
-    function toggleTodo(i) { S.todos[i].done = !S.todos[i].done; save(); renderTodos(); }
-    function delTodo(i) { S.todos.splice(i,1); save(); renderTodos(); }
+    async function toggleTodo(i) { S.todos[i].done = !S.todos[i].done; renderTodos(); await save(); }
+    async function delTodo(i) { S.todos.splice(i,1); renderTodos(); await save(); }
 
-    function addDday() {
+    async function addDday() {
       const n = document.getElementById('dday-name').value.trim(), d = document.getElementById('dday-date').value;
       if(!n||!d) return;
-      S.ddays.push({name:n, date:d}); save();
+      S.ddays.push({name:n, date:d});
       document.getElementById('dday-name').value=''; document.getElementById('dday-date').value='';
-      renderDdays();
+      renderDdays(); await save();
     }
-    function delDday(i) { S.ddays.splice(i,1); save(); renderDdays(); }
+    async function delDday(i) { S.ddays.splice(i,1); renderDdays(); await save(); }
 
     tick(); setInterval(tick, 30000);
     renderCal(); loadAll();
