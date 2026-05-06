@@ -211,18 +211,36 @@
   </div>
 
   <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw6DrpbJmAoxHA46VkN9YKfJmO49yA-tssQ-_mTKiqoSeDbXhhd5nLzbmCOxZghk1QF/exec';
+
     const S = {
-      memos: JSON.parse(localStorage.getItem('dash_memos') || '[]'),
-      todos: JSON.parse(localStorage.getItem('dash_todos') || '[]'),
-      ddays: JSON.parse(localStorage.getItem('dash_ddays') || '[]'),
+      memos: [],
+      todos: [],
+      ddays: [],
       cy: new Date().getFullYear(),
       cm: new Date().getMonth()
     };
 
-    function save() {
-      localStorage.setItem('dash_memos', JSON.stringify(S.memos));
-      localStorage.setItem('dash_todos', JSON.stringify(S.todos));
-      localStorage.setItem('dash_ddays', JSON.stringify(S.ddays));
+    async function loadAll() {
+      try {
+        const [memos, todos, ddays] = await Promise.all([
+          fetch(SCRIPT_URL + '?type=memos').then(r => r.json()).catch(() => []),
+          fetch(SCRIPT_URL + '?type=todos').then(r => r.json()).catch(() => []),
+          fetch(SCRIPT_URL + '?type=ddays').then(r => r.json()).catch(() => []),
+        ]);
+        S.memos = memos; S.todos = todos; S.ddays = ddays;
+        renderMemos(); renderTodos(); renderDdays();
+      } catch(e) { console.error('불러오기 실패', e); }
+    }
+
+    async function save() {
+      try {
+        await Promise.all([
+          fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ type: 'memos', items: S.memos }) }),
+          fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ type: 'todos', items: S.todos }) }),
+          fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ type: 'ddays', items: S.ddays }) }),
+        ]);
+      } catch(e) { console.error('저장 실패', e); }
     }
 
     function todayStr() {
@@ -325,7 +343,7 @@
     function delDday(i) { S.ddays.splice(i,1); save(); renderDdays(); }
 
     tick(); setInterval(tick, 30000);
-    renderCal(); renderMemos(); renderTodos(); renderDdays();
+    renderCal(); loadAll();
   </script>
 </body>
 </html>
