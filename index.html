@@ -210,37 +210,28 @@
 
   </div>
 
-  <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw6DrpbJmAoxHA46VkN9YKfJmO49yA-tssQ-_mTKiqoSeDbXhhd5nLzbmCOxZghk1QF/exec';
-
+<script>
+    // 1. 초기 데이터 설정 (로컬 스토리지에서 불러오기)
     const S = {
-      memos: [],
-      todos: [],
-      ddays: [],
+      memos: JSON.parse(localStorage.getItem('memos')) || [],
+      todos: JSON.parse(localStorage.getItem('todos')) || [],
+      ddays: JSON.parse(localStorage.getItem('ddays')) || [],
       cy: new Date().getFullYear(),
       cm: new Date().getMonth()
     };
 
-    async function loadAll() {
-      try {
-        const [memos, todos, ddays] = await Promise.all([
-          fetch(SCRIPT_URL + '?type=memos').then(r => r.json()).catch(() => []),
-          fetch(SCRIPT_URL + '?type=todos').then(r => r.json()).catch(() => []),
-          fetch(SCRIPT_URL + '?type=ddays').then(r => r.json()).catch(() => []),
-        ]);
-        S.memos = memos; S.todos = todos; S.ddays = ddays;
-        renderMemos(); renderTodos(); renderDdays();
-      } catch(e) { console.error('불러오기 실패', e); }
+    // 2. 저장 함수 (브라우저에 즉시 저장)
+    function save() {
+      localStorage.setItem('memos', JSON.stringify(S.memos));
+      localStorage.setItem('todos', JSON.stringify(S.todos));
+      localStorage.setItem('ddays', JSON.stringify(S.ddays));
     }
 
-    async function save() {
-      try {
-        await Promise.all([
-          fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ type: 'memos', items: S.memos }) }),
-          fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ type: 'todos', items: S.todos }) }),
-          fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ type: 'ddays', items: S.ddays }) }),
-        ]);
-      } catch(e) { console.error('저장 실패', e); }
+    // 3. 로드 함수 (화면 갱신만 수행)
+    function loadAll() {
+      renderMemos();
+      renderTodos();
+      renderDdays();
     }
 
     function todayStr() {
@@ -320,27 +311,27 @@
       }).join('');
     }
 
-    async function addMemo() {
+    function addMemo() {
       const inp = document.getElementById('memo-input'), t = inp.value.trim(); if(!t) return;
-      S.memos.unshift({text:t, date:todayStr()}); inp.value=''; renderMemos(); await save();
+      S.memos.unshift({text:t, date:todayStr()}); inp.value=''; renderMemos(); save();
     }
-    async function delMemo(i) { S.memos.splice(i,1); renderMemos(); await save(); }
+    function delMemo(i) { S.memos.splice(i,1); renderMemos(); save(); }
 
-    async function addTodo() {
+    function addTodo() {
       const inp = document.getElementById('todo-input'), t = inp.value.trim(); if(!t) return;
-      S.todos.unshift({text:t, done:false}); inp.value=''; renderTodos(); await save();
+      S.todos.unshift({text:t, done:false}); inp.value=''; renderTodos(); save();
     }
-    async function toggleTodo(i) { S.todos[i].done = !S.todos[i].done; renderTodos(); await save(); }
-    async function delTodo(i) { S.todos.splice(i,1); renderTodos(); await save(); }
+    function toggleTodo(i) { S.todos[i].done = !S.todos[i].done; renderTodos(); save(); }
+    function delTodo(i) { S.todos.splice(i,1); renderTodos(); save(); }
 
-    async function addDday() {
+    function addDday() {
       const n = document.getElementById('dday-name').value.trim(), d = document.getElementById('dday-date').value;
       if(!n||!d) return;
       S.ddays.push({name:n, date:d});
       document.getElementById('dday-name').value=''; document.getElementById('dday-date').value='';
-      renderDdays(); await save();
+      renderDdays(); save();
     }
-    async function delDday(i) { S.ddays.splice(i,1); renderDdays(); await save(); }
+    function delDday(i) { S.ddays.splice(i,1); renderDdays(); save(); }
 
     tick(); setInterval(tick, 30000);
     renderCal(); loadAll();
