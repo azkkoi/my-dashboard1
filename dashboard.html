@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>내 대시보드</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --bg2: #f5f5f3;
+      --bg3: #efefec;
+      --text: #1a1a1a;
+      --text2: #6b6b6b;
+      --text3: #aaaaaa;
+      --border: rgba(0,0,0,0.1);
+      --border2: rgba(0,0,0,0.18);
+      --radius-md: 8px;
+      --radius-lg: 12px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1e1e1e;
+        --bg2: #2a2a2a;
+        --bg3: #333333;
+        --text: #f0f0f0;
+        --text2: #aaaaaa;
+        --text3: #666666;
+        --border: rgba(255,255,255,0.1);
+        --border2: rgba(255,255,255,0.2);
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg3);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+
+    .container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+    .card {
+      background: var(--bg);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* 인사 카드 */
+    .greeting-card {
+      background: var(--bg2);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .greeting-card h1 { font-size: 20px; font-weight: 500; color: var(--text); }
+    .greeting-card p { font-size: 14px; color: var(--text2); margin-top: 4px; }
+    .clock { font-size: 32px; font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; }
+
+    /* 2열 그리드 */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    /* 달력 */
+    .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .cal-month { font-size: 15px; font-weight: 500; color: var(--text); }
+    .cal-nav { display: flex; gap: 4px; }
+    .cal-nav button {
+      background: none; border: 0.5px solid var(--border); border-radius: var(--radius-md);
+      width: 28px; height: 28px; cursor: pointer; color: var(--text2); font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cal-nav button:hover { background: var(--bg2); }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .cal-day-label { font-size: 11px; color: var(--text3); text-align: center; padding: 4px 0; font-weight: 500; }
+    .cal-day {
+      font-size: 13px; text-align: center; padding: 6px 2px;
+      border-radius: 6px; cursor: default; color: var(--text); line-height: 1;
+    }
+    .cal-day.today { background: var(--text); color: var(--bg); font-weight: 500; }
+    .cal-day.other-month { color: var(--text3); }
+
+    /* D-day */
+    .dday-add { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+    .dday-add input[type=text] {
+      flex: 1; min-width: 70px; font-size: 13px; padding: 7px 10px;
+      border: 0.5px solid var(--border); border-radius: var(--radius-md);
+      background: var(--bg); color: var(--text);
+    }
+    .dday-add input[type=date] {
+      font-size: 13px; padding: 7px 8px;
+      border: 0.5px solid var(--border); border-radius: var(--radius-md);
+      background: var(--bg); color: var(--text);
+    }
+    .dday-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 0.5px solid var(--border); border-radius: var(--radius-md); margin-bottom: 6px; }
+    .dday-name { flex: 1; font-size: 14px; color: var(--text); }
+    .dday-badge { font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 20px; background: #E6F1FB; color: #185FA5; }
+    .dday-badge.past { background: var(--bg2); color: var(--text2); }
+
+    /* 메모 & 할일 공통 */
+    .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .input-row input {
+      flex: 1; font-size: 14px; padding: 8px 12px;
+      border: 0.5px solid var(--border); border-radius: var(--radius-md);
+      background: var(--bg); color: var(--text);
+    }
+    .input-row input:focus { outline: none; border-color: var(--border2); }
+    .item-list { display: flex; flex-direction: column; gap: 6px; }
+    .item {
+      display: flex; align-items: flex-start; gap: 8px; padding: 9px 12px;
+      background: var(--bg2); border-radius: var(--radius-md);
+      border: 0.5px solid var(--border);
+    }
+    .item-text { flex: 1; font-size: 14px; color: var(--text); line-height: 1.5; word-break: break-word; }
+    .item-date { font-size: 11px; color: var(--text3); white-space: nowrap; padding-top: 2px; }
+    .item.done .item-text { text-decoration: line-through; color: var(--text3); }
+    .check-btn {
+      background: none; border: 0.5px solid var(--border2);
+      border-radius: 4px; width: 16px; height: 16px;
+      cursor: pointer; flex-shrink: 0; margin-top: 3px;
+    }
+    .check-btn.checked { background: var(--text); border-color: var(--text); }
+    .del-btn { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 16px; padding: 0; line-height: 1; flex-shrink: 0; }
+    .del-btn:hover { color: var(--text); }
+    .empty { font-size: 13px; color: var(--text3); text-align: center; padding: 20px 0; }
+
+    /* 버튼 공통 */
+    button.add-btn {
+      padding: 8px 14px; border: 0.5px solid var(--border);
+      border-radius: var(--radius-md); background: var(--text);
+      color: var(--bg); cursor: pointer; font-size: 14px; white-space: nowrap;
+    }
+    button.add-btn:hover { opacity: 0.85; }
+    button.add-btn.sm { padding: 6px 14px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="greeting-card">
+      <div>
+        <h1 id="greet-text">안녕하세요 👋</h1>
+        <p id="greet-date"></p>
+      </div>
+      <div class="clock" id="clock">--:--</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="cal-header">
+          <div class="cal-month" id="cal-title"></div>
+          <div class="cal-nav">
+            <button onclick="changeMonth(-1)"><i class="ti ti-chevron-left"></i></button>
+            <button onclick="changeMonth(1)"><i class="ti ti-chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-calendar-event"></i> D-day</div>
+        <div class="dday-add">
+          <input type="text" id="dday-name" placeholder="이름" />
+          <input type="date" id="dday-date" />
+          <button class="add-btn sm" onclick="addDday()">추가</button>
+        </div>
+        <div id="dday-list"></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-note"></i> 메모</div>
+        <div class="input-row">
+          <input type="text" id="memo-input" placeholder="메모를 입력하세요..." onkeydown="if(event.key==='Enter') addMemo()" />
+          <button class="add-btn" onclick="addMemo()">추가</button>
+        </div>
+        <div class="item-list" id="memo-list"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-check"></i> 할 일</div>
+        <div class="input-row">
+          <input type="text" id="todo-input" placeholder="할 일을 입력하세요..." onkeydown="if(event.key==='Enter') addTodo()" />
+          <button class="add-btn" onclick="addTodo()">추가</button>
+        </div>
+        <div class="item-list" id="todo-list"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const S = {
+      memos: JSON.parse(localStorage.getItem('dash_memos') || '[]'),
+      todos: JSON.parse(localStorage.getItem('dash_todos') || '[]'),
+      ddays: JSON.parse(localStorage.getItem('dash_ddays') || '[]'),
+      cy: new Date().getFullYear(),
+      cm: new Date().getMonth()
+    };
+
+    function save() {
+      localStorage.setItem('dash_memos', JSON.stringify(S.memos));
+      localStorage.setItem('dash_todos', JSON.stringify(S.todos));
+      localStorage.setItem('dash_ddays', JSON.stringify(S.ddays));
+    }
+
+    function todayStr() {
+      const n = new Date();
+      return n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' + String(n.getDate()).padStart(2,'0');
+    }
+
+    function tick() {
+      const n = new Date();
+      document.getElementById('clock').textContent = String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+      const h = n.getHours();
+      const g = h<5 ? '좋은 밤이에요 🌙' : h<9 ? '좋은 아침이에요 ☀️' : h<12 ? '좋은 오전이에요 🌤' : h<18 ? '좋은 오후예요 ☀️' : h<21 ? '좋은 저녁이에요 🌆' : '좋은 밤이에요 🌙';
+      document.getElementById('greet-text').textContent = g;
+      const days = ['일','월','화','수','목','금','토'];
+      document.getElementById('greet-date').textContent = n.getFullYear() + '년 ' + (n.getMonth()+1) + '월 ' + n.getDate() + '일 ' + days[n.getDay()] + '요일';
+    }
+
+    function renderCal() {
+      const y = S.cy, m = S.cm;
+      const mn = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+      document.getElementById('cal-title').textContent = y + '년 ' + mn[m];
+      const first = new Date(y,m,1).getDay(), last = new Date(y,m+1,0).getDate();
+      const n = new Date();
+      let h = ['일','월','화','수','목','금','토'].map(d => `<div class="cal-day-label">${d}</div>`).join('');
+      for (let i = 0; i < first; i++) h += `<div class="cal-day other-month">${new Date(y,m,-first+i+1).getDate()}</div>`;
+      for (let d = 1; d <= last; d++) {
+        const isT = d===n.getDate() && m===n.getMonth() && y===n.getFullYear();
+        h += `<div class="cal-day${isT?' today':''}">${d}</div>`;
+      }
+      const rem = (first+last)%7; if(rem>0) for(let d=1;d<=7-rem;d++) h+=`<div class="cal-day other-month">${d}</div>`;
+      document.getElementById('cal-grid').innerHTML = h;
+    }
+
+    function changeMonth(d) {
+      S.cm += d;
+      if (S.cm > 11) { S.cm = 0; S.cy++; }
+      if (S.cm < 0) { S.cm = 11; S.cy--; }
+      renderCal();
+    }
+
+    function renderMemos() {
+      const el = document.getElementById('memo-list');
+      if (!S.memos.length) { el.innerHTML = '<div class="empty">메모가 없습니다</div>'; return; }
+      el.innerHTML = S.memos.map((m,i) => `
+        <div class="item">
+          <div class="item-text">${m.text}</div>
+          <span class="item-date">${m.date}</span>
+          <button class="del-btn" onclick="delMemo(${i})" aria-label="삭제"><i class="ti ti-x"></i></button>
+        </div>`).join('');
+    }
+
+    function renderTodos() {
+      const el = document.getElementById('todo-list');
+      if (!S.todos.length) { el.innerHTML = '<div class="empty">할 일이 없습니다</div>'; return; }
+      el.innerHTML = S.todos.map((t,i) => `
+        <div class="item${t.done?' done':''}">
+          <button class="check-btn${t.done?' checked':''}" onclick="toggleTodo(${i})" aria-label="완료 토글"></button>
+          <div class="item-text">${t.text}</div>
+          <button class="del-btn" onclick="delTodo(${i})" aria-label="삭제"><i class="ti ti-x"></i></button>
+        </div>`).join('');
+    }
+
+    function renderDdays() {
+      const el = document.getElementById('dday-list');
+      const today = new Date(); today.setHours(0,0,0,0);
+      if (!S.ddays.length) { el.innerHTML = '<div class="empty">D-day가 없습니다</div>'; return; }
+      el.innerHTML = S.ddays.map((d,i) => {
+        const t = new Date(d.date); t.setHours(0,0,0,0);
+        const diff = Math.round((t-today)/86400000);
+        const lbl = diff===0 ? 'D-day' : diff>0 ? 'D-'+diff : 'D+'+Math.abs(diff);
+        return `<div class="dday-item">
+          <span class="dday-name">${d.name}</span>
+          <span class="dday-badge${diff<0?' past':''}">${lbl}</span>
+          <button class="del-btn" onclick="delDday(${i})" aria-label="삭제"><i class="ti ti-x"></i></button>
+        </div>`;
+      }).join('');
+    }
+
+    function addMemo() {
+      const inp = document.getElementById('memo-input'), t = inp.value.trim(); if(!t) return;
+      S.memos.unshift({text:t, date:todayStr()}); save(); inp.value=''; renderMemos();
+    }
+    function delMemo(i) { S.memos.splice(i,1); save(); renderMemos(); }
+
+    function addTodo() {
+      const inp = document.getElementById('todo-input'), t = inp.value.trim(); if(!t) return;
+      S.todos.unshift({text:t, done:false}); save(); inp.value=''; renderTodos();
+    }
+    function toggleTodo(i) { S.todos[i].done = !S.todos[i].done; save(); renderTodos(); }
+    function delTodo(i) { S.todos.splice(i,1); save(); renderTodos(); }
+
+    function addDday() {
+      const n = document.getElementById('dday-name').value.trim(), d = document.getElementById('dday-date').value;
+      if(!n||!d) return;
+      S.ddays.push({name:n, date:d}); save();
+      document.getElementById('dday-name').value=''; document.getElementById('dday-date').value='';
+      renderDdays();
+    }
+    function delDday(i) { S.ddays.splice(i,1); save(); renderDdays(); }
+
+    tick(); setInterval(tick, 30000);
+    renderCal(); renderMemos(); renderTodos(); renderDdays();
+  </script>
+</body>
+</html>
